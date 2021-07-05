@@ -1,72 +1,31 @@
 import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { setSelectedOrg, setSelectedRepo, loadCommits, loadRepos } from "./actions";
+
 import './App.css';
 
 function App() {
-  const DEFAULT_PAGE_LENGTH = 100;
+  const { commits, errors, repos, selectedOrg, selectedRepo } = useSelector((state) => ({
+    commits: state.commits,
+    errors: state.errors,
+    repos: state.repos,
+    selectedOrg: state.selectedOrg,
+    selectedRepo: state.selectedRepo
+  }));
 
+  const dispatch = useDispatch();
   const [org, setOrg] = useState();
-  const [selectedOrg, setSelectedOrg] = useState();
-  const [selectedRepo, setSelectedRepo] = useState();
-  const [repos, setRepos] = useState([]);
-  const [commits, setCommits] = useState([]);
-  const [errors, setErrors] = useState([]);
-  const [user, setUser] = useState({});
-
-  const basicAuth = Buffer.from(`${process.env.REACT_APP_GH_CLIENT_ID}:${process.env.REACT_APP_GH_SECRET}`).toString('base64');
-  const fetchOptions = {
-    headers: new Headers({ "Authorization": `Basic ${basicAuth}` })
-  };
 
   useEffect(() => {
-    const loadRepos = async () => {
-      let loadingRepos = [], page = 1;
-      while (page > -1) {
-        const response = await fetch(`https://api.github.com/orgs/${selectedOrg}/repos?page=${page}&per_page=${DEFAULT_PAGE_LENGTH}`, fetchOptions);
-        const json = await response.json();
-
-        if (response.status === 200) {
-          loadingRepos = loadingRepos.concat(json);
-
-          if (json.length < DEFAULT_PAGE_LENGTH) {
-            page = -1;
-          } else {
-            page++;
-          }
-
-          setErrors([]);
-        } else {
-          page = -1;
-          setErrors([json.message]);
-        }
-      }
-
-      loadingRepos.sort((a, b) => (a.open_issues_count < b.open_issues_count) ? 1 : -1);
-
-      setRepos(loadingRepos);
-    };
-
-    if (selectedOrg) { loadRepos(); }
-  }, [selectedOrg, setRepos]);
+    if (selectedOrg.length > 0) { dispatch(loadRepos()); }
+  }, [selectedOrg, dispatch]);
 
   useEffect(() => {
-    const loadCommits = async () => {
-      const response= await fetch(`https://api.github.com/repos/${selectedOrg}/${selectedRepo}/commits?&per_page=${DEFAULT_PAGE_LENGTH}`, fetchOptions);
-      const json = await response.json();
-
-      if (response.status === 200) {
-        setErrors([]);
-        setCommits(json);
-      } else {
-        setErrors([json.message]);
-      }
-    };
-
-    if (selectedRepo) { loadCommits(); }
-  }, [selectedRepo, selectedOrg, setCommits]);
+    if (selectedRepo.length > 0) { dispatch(loadCommits()); }
+  }, [selectedRepo, dispatch]);
 
   const handleUpdate = (e) => setOrg(e.target.value);
-  const handleSubmit = () => setSelectedOrg(org);
-  const handleRepoSelect = (repo) => setSelectedRepo(repo);
+  const handleSubmit = () => dispatch(setSelectedOrg(org));
 
   return (
     <div className="container">
@@ -77,7 +36,7 @@ function App() {
       {errors.length >= 1 && (
         <div className="errors">
           {errors.map((error) => (
-            <p><em>{error}</em></p>
+            <p key={error}><em>{error}</em></p>
           ))}
         </div>
       )}
@@ -97,7 +56,7 @@ function App() {
         <div className="col list-repos">
             <ul>
               {repos.map((repo) => (
-                <li key={repo.id} onClick={() => handleRepoSelect(repo.name)}>
+                <li key={repo.id} onClick={() => dispatch(setSelectedRepo(repo.name))}>
                   {repo.name}: {repo.open_issues_count} 🛠
                 </li>
               ))}

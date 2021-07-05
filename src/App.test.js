@@ -1,15 +1,22 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Provider } from 'react-redux';
+import { createStore, applyMiddleware } from 'redux';
+import reduxThunk from "redux-thunk";
+
+import storeReducer from './reducers.js'
 import App from './App';
 
+const store = createStore(storeReducer, applyMiddleware(reduxThunk));
+
 test('renders input box for organization name', () => {
-  render(<App />);
+  render(<Provider store={store}><App /></Provider>);
   const inputField = screen.getByRole('textbox');
   expect(inputField).toBeInTheDocument();
 });
 
 test('renders repos when org is given', async () => {
-  render(<App />);
+  render(<Provider store={store}><App /></Provider>);
   const inputField = screen.getByRole('textbox');
   userEvent.type(inputField, "test");
 
@@ -20,7 +27,7 @@ test('renders repos when org is given', async () => {
 });
 
 test('renders error when repos fail to load', async () => {
-  render(<App />);
+  render(<Provider store={store}><App /></Provider>);
   const inputField = screen.getByRole('textbox');
   userEvent.type(inputField, "rate_limit");
 
@@ -31,7 +38,7 @@ test('renders error when repos fail to load', async () => {
 });
 
 test('renders commits when repo is selected', async () => {
-  render(<App />);
+  render(<Provider store={store}><App /></Provider>);
   const inputField = screen.getByRole('textbox');
   userEvent.type(inputField, "test");
 
