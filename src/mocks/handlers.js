@@ -22,17 +22,32 @@ const commitFixtures = [
   {
     sha: "1a2b3c4d5e",
     url: "https://example.com/1",
-    commit: { message: "Most recent commit" }
+    commit: { 
+      message: "Most recent commit",
+      author: {
+        date: "2020-10-10T00:00:00Z"
+      }
+    }
   },
   {
     sha: "2a2b3c4d6e",
     url: "https://example.com/2",
-    commit: { message: "Slightly older commit" }
+    commit: {
+      message: "Slightly older commit",
+      author: {
+        date: "2019-10-10T00:00:00Z"
+      }
+    }
   },
   {
     sha: "3a2b3c4d7e",
     url: "https://example.com/3",
-    commit: { message: "Initial commit" }
+    commit: {
+      message: "Initial commit",
+      author: {
+        date: "2019-10-10T00:00:00Z"
+      }
+    }
   }
 ];
 

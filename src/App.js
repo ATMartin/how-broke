@@ -82,6 +82,9 @@ function App() {
             {commits.map(({sha, commit, html_url}) => (
               <li key={sha} className="commit">
                 <div className="message">{commit.message}</div>
+                <div className="date">
+                  <small>{new Date(commit.author.date).toLocaleDateString()}</small>
+                </div>
                 <div className="link">
                   <a href={html_url} target="_blank">
                     <small>{sha.substr(0, 6)} 🔗</small>
