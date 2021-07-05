@@ -6,6 +6,8 @@ When contributing to open source or joining a new team, a great way to find high
 
 This app links up to the GitHub API and lets users browse an organization's public repos sorted by the number of open issues. Selecting a repo will show the latest 100 commits, to help determine if the repo is active enough to warrant support.
 
+#### Check this app out live on [Glitch](https://how-broke-is-it.glitch.me/)! 🎏
+
 
 ## Setup & Details
 
