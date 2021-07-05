@@ -11,6 +11,14 @@ h1 {
   justify-content: center;
 }
 
+.errors {
+  text-align: center;
+  flex-basis: 100%;
+  border: 1px solid red;
+  background-color: #e55;
+  color: white;
+}
+
 .col {
   vertical-align: top;
 }

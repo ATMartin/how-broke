@@ -43,6 +43,12 @@ export const handlers = [
       ctx.json(repoFixtures)
     );
   }),
+  rest.get('https://api.github.com/orgs/rate_limit/repos', (req, res, ctx) => {
+    return res(
+      ctx.status(403),
+      ctx.json({ message: "API rate limit exceeded" })
+    );
+  }),
   rest.get('https://api.github.com/repos/test/cool_js/commits', (req, res, ctx) => {
     return res(
       ctx.status(200),

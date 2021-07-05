@@ -9,6 +9,7 @@ function App() {
   const [selectedRepo, setSelectedRepo] = useState();
   const [repos, setRepos] = useState([]);
   const [commits, setCommits] = useState([]);
+  const [errors, setErrors] = useState([]);
 
   useEffect(() => {
     const loadRepos = async () => {
@@ -20,16 +21,25 @@ function App() {
         const response = await fetch(`https://api.github.com/orgs/${selectedOrg}/repos?page=${page}&per_page=${DEFAULT_PAGE_LENGTH}`);
         const json = await response.json();
 
-        loadingRepos = loadingRepos.concat(json);
+        console.log(json);
+        if (response.status === 200) {
+          loadingRepos = loadingRepos.concat(json);
 
-        if (json.length < DEFAULT_PAGE_LENGTH) {
-          page = -1;
+          if (json.length < DEFAULT_PAGE_LENGTH) {
+            page = -1;
+          } else {
+            page++;
+          }
+
+          setErrors([]);
         } else {
-          page++;
+          page = -1;
+          setErrors([json.message]);
         }
       }
 
       loadingRepos.sort((a, b) => (a.open_issues_count < b.open_issues_count) ? 1 : -1);
+
       setRepos(loadingRepos);
     };
 
@@ -43,7 +53,13 @@ function App() {
       const response= await fetch(`https://api.github.com/repos/${selectedOrg}/${selectedRepo}/commits?&per_page=${DEFAULT_PAGE_LENGTH}`);
       const json = await response.json();
 
-      setCommits(json);
+      console.log(json);
+      if (response.status === 200) {
+        setErrors([]);
+        setCommits(json);
+      } else {
+        setErrors([json.message]);
+      }
     };
 
     if (selectedRepo) { loadCommits(); }
@@ -56,6 +72,13 @@ function App() {
   return (
     <div className="container">
       <h1>How Broke IS It?</h1>
+      {errors.length >= 1 && (
+        <div className="errors">
+          {errors.map((error) => (
+            <p><em>{error}</em></p>
+          ))}
+        </div>
+      )}
       <div className="col input-org">
         <input
           type="text"

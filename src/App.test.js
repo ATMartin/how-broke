@@ -19,6 +19,17 @@ test('renders repos when org is given', async () => {
   expect(repo).toBeInTheDocument();
 });
 
+test('renders error when repos fail to load', async () => {
+  render(<App />);
+  const inputField = screen.getByRole('textbox');
+  userEvent.type(inputField, "rate_limit");
+
+  screen.getByRole('button').click();
+
+  const repo = await waitFor(() => screen.getByText(/API rate limit exceeded/i));
+  expect(repo).toBeInTheDocument();
+});
+
 test('renders commits when repo is selected', async () => {
   render(<App />);
   const inputField = screen.getByRole('textbox');
