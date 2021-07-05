@@ -30,6 +30,8 @@ function App() {
       }
     }
 
+    loadingRepos.sort((a, b) => (a.open_issues_count < b.open_issues_count) ? 1 : -1);
+
     setRepos(loadingRepos);
   }
 
