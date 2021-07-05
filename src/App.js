@@ -21,17 +21,24 @@ function App() {
   }, [selectedOrg, dispatch]);
 
   useEffect(() => {
-    if (selectedRepo.length > 0) { dispatch(loadCommits()); }
+    if (selectedRepo.name) { dispatch(loadCommits()); }
   }, [selectedRepo, dispatch]);
 
   const handleUpdate = (e) => setOrg(e.target.value);
-  const handleSubmit = () => dispatch(setSelectedOrg(org));
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(setSelectedOrg(org));
+  };
 
   return (
     <div className="container">
       <div className="header">
-        <h1>How Broke IS It?</h1>
-        <h4><a href="#" onClick={() => alert("Coming Soon!")}>Log In With GitHub</a></h4>
+        <a href="/"><h1>How Broke IS It? 🚒</h1></a>
+        <em>
+          Scan GitHub orgs for projects with a high need for attention!
+          <br />
+          Repositories are sorted by number of open issues.
+        </em>
       </div>
       {errors.length >= 1 && (
         <div className="errors">
@@ -41,12 +48,15 @@ function App() {
         </div>
       )}
       <div className="col input-org">
+        <form onSubmit={handleSubmit}>
         <input
           type="text"
           onChange={handleUpdate}
-          placeholder="Type your GitHub org name here..."
+          placeholder="Type any GitHub org name here..."
         />
-        <button onClick={handleSubmit}>Go!</button>
+        <br />
+        <input type="submit" value="Go!" />
+        </form>
         <br />
         {repos.length > 0 && (
           <small>Displaying {repos.length} respositories</small>
@@ -55,9 +65,12 @@ function App() {
       {repos.length > 0 && (
         <div className="col list-repos">
             <ul>
-              {repos.map((repo) => (
-                <li key={repo.id} onClick={() => dispatch(setSelectedRepo(repo.name))}>
-                  {repo.name}: {repo.open_issues_count} 🛠
+              {repos.map(({id, name, open_issues_count}) => (
+                <li key={id} className={`repo ${selectedRepo.name === name ? "selected" : ""}`} onClick={() => dispatch(setSelectedRepo(name))}>
+                  <div className="title">{name}</div>
+                  <div className="score">
+                    {open_issues_count > 0 ? `${open_issues_count} 🔥` : "✅" }
+                  </div>
                 </li>
               ))}
             </ul>
@@ -66,10 +79,19 @@ function App() {
       {commits.length > 0 && (
         <div className="col list-commits">
           <ul>
-            {commits.map((commit) => (
-              <li key={commit.sha}>
-               {commit.commit.message} (<a href={commit.url}>{commit.sha.substr(0, 6)}</a>)</li>
+            {commits.map(({sha, commit, html_url}) => (
+              <li key={sha} className="commit">
+                <div className="message">{commit.message}</div>
+                <div className="link">
+                  <a href={html_url} target="_blank">
+                    <small>{sha.substr(0, 6)} 🔗</small>
+                  </a>
+                </div>
+              </li>
             ))}
+            <li className="commit">
+              <a href={selectedRepo.html_url} target="_blank">🕵️‍♀️ See all commits at GitHub 🔗</a>
+            </li>
           </ul>
         </div>
       )}

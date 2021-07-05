@@ -2,7 +2,7 @@ import { actions } from "./actions";
 
 const initialState = {
   selectedOrg: "",
-  selectedRepo: "",
+  selectedRepo: {},
   repos: [],
   commits: [],
   errors: []
@@ -13,7 +13,8 @@ const reducer = function(state = initialState, action) {
     case actions.SET_SELECTED_ORG:
       return { ...state, selectedOrg: action.payload };
     case actions.SET_SELECTED_REPO:
-      return { ...state, selectedRepo: action.payload };
+      const selectedRepo = state.repos.filter(repo => repo.name === action.payload)[0];
+      return { ...state, selectedRepo };
     case actions.SET_REPOS:
       return { ...state, repos: action.payload };
     case actions.SET_COMMITS:

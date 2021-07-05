@@ -63,7 +63,7 @@ export const loadRepos = (org) => {
 export const loadCommits = (repo) => {
   return async (dispatch, getState) => {
     const { selectedOrg, selectedRepo } = getState();
-    const url = `${baseUrl}/repos/${selectedOrg}/${selectedRepo}/commits`;
+    const url = `${baseUrl}/repos/${selectedOrg}/${selectedRepo.name}/commits`;
     const response= await fetch(`${url}?per_page=${defaultPageSize}`, fetchOptions);
     const json = await response.json();
 
