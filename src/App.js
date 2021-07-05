@@ -52,9 +52,14 @@ function App() {
 
   return (
     <div className="container">
-      <h1>How Broke IS it?</h1>
+      <h1>How Broke IS It?</h1>
       <div className="col input-org">
-        <input onChange={handleUpdate} onBlur={handleSubmit} placeholder="Type your GitHub org name here..." />
+        <input
+          type="text"
+          onChange={handleUpdate}
+          placeholder="Type your GitHub org name here..."
+        />
+        <button onClick={handleSubmit}>Go!</button>
         <br />
         {repos.length > 0 && (
           <small>Displaying {repos.length} respositories</small>
