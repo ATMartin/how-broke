@@ -10,18 +10,20 @@ function App() {
   const [repos, setRepos] = useState([]);
   const [commits, setCommits] = useState([]);
   const [errors, setErrors] = useState([]);
+  const [user, setUser] = useState({});
+
+  const basicAuth = Buffer.from(`${process.env.REACT_APP_GH_CLIENT_ID}:${process.env.REACT_APP_GH_SECRET}`).toString('base64');
+  const fetchOptions = {
+    headers: new Headers({ "Authorization": `Basic ${basicAuth}` })
+  };
 
   useEffect(() => {
     const loadRepos = async () => {
-      console.log(`[FETCH] Begin repo list for ${selectedOrg}`);
-
       let loadingRepos = [], page = 1;
       while (page > -1) {
-        console.log(`[SUBFETCH] Fetching page ${page} for ${selectedOrg}`);
-        const response = await fetch(`https://api.github.com/orgs/${selectedOrg}/repos?page=${page}&per_page=${DEFAULT_PAGE_LENGTH}`);
+        const response = await fetch(`https://api.github.com/orgs/${selectedOrg}/repos?page=${page}&per_page=${DEFAULT_PAGE_LENGTH}`, fetchOptions);
         const json = await response.json();
 
-        console.log(json);
         if (response.status === 200) {
           loadingRepos = loadingRepos.concat(json);
 
@@ -48,12 +50,9 @@ function App() {
 
   useEffect(() => {
     const loadCommits = async () => {
-      console.log(`[FETCH] Begin commit list for ${selectedRepo}`);
-      console.log(`[SUBFETCH] Fetching first page of commits for ${selectedRepo}`);
-      const response= await fetch(`https://api.github.com/repos/${selectedOrg}/${selectedRepo}/commits?&per_page=${DEFAULT_PAGE_LENGTH}`);
+      const response= await fetch(`https://api.github.com/repos/${selectedOrg}/${selectedRepo}/commits?&per_page=${DEFAULT_PAGE_LENGTH}`, fetchOptions);
       const json = await response.json();
 
-      console.log(json);
       if (response.status === 200) {
         setErrors([]);
         setCommits(json);
@@ -71,7 +70,10 @@ function App() {
 
   return (
     <div className="container">
-      <h1>How Broke IS It?</h1>
+      <div className="header">
+        <h1>How Broke IS It?</h1>
+        <h4><a href="#" onClick={() => alert("Coming Soon!")}>Log In With GitHub</a></h4>
+      </div>
       {errors.length >= 1 && (
         <div className="errors">
           {errors.map((error) => (
