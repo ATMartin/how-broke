@@ -5,7 +5,9 @@ function App() {
   const DEFAULT_PAGE_LENGTH = 100;
 
   const [org, setOrg] = useState();
+  const [selectedRepo, setSelectedRepo] = useState();
   const [repos, setRepos] = useState([]);
+  const [commits, setCommits] = useState([]);
 
   const handleUpdate = (e) => {
     setOrg(e.target.value);
@@ -35,6 +37,17 @@ function App() {
     setRepos(loadingRepos);
   }
 
+  const handleRepoSelect = async (repo) => {
+    console.log(`[FETCH] Begin commit list for ${repo}`);
+
+      console.log(`[SUBFETCH] Fetching first page of commits for ${repo}`);
+      let data = await fetch(`https://api.github.com/repos/${org}/${repo}/commits?&per_page=${DEFAULT_PAGE_LENGTH}`),
+          json = await data.json();
+
+      setSelectedRepo(repo);
+      setCommits(json);
+  }
+
   return (
     <div className="App">
       <h1>How Broke IS it?</h1>
@@ -48,7 +61,17 @@ function App() {
             <small>Displaying {repos.length} respositories:</small>
             <ul>
               {repos.map((repo) => (
-                <li key={repo.id}>{repo.name} ({repo.open_issues_count} issues)</li>
+                <li key={repo.id}>
+                  {repo.name} ({repo.open_issues_count} issues)
+                  <button onClick={() => handleRepoSelect(repo.name)}>See Commits</button>
+                  {repo.name === selectedRepo && commits.length > 0 && (
+                    <ul className="list-commits">
+                      {commits.map((commit) => (
+                        <li>{commit.commit.message} ({commit.sha})</li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
               ))}
             </ul>
           </>
