@@ -2,6 +2,8 @@ import { useState } from 'react';
 import './App.css';
 
 function App() {
+  const DEFAULT_PAGE_LENGTH = 100;
+
   const [org, setOrg] = useState();
   const [repos, setRepos] = useState([]);
 
@@ -9,15 +11,26 @@ function App() {
     setOrg(e.target.value);
   };
 
-  const handleSubmit = () => {
-    const testRepos = [
-      { name: "Repo 1", issues_count: "123" },
-      { name: "Repo 2", issues_count: "1" },
-      { name: "Repo 3", issues_count: "34" },
-      { name: "Repo 4", issues_count: "321" },
-    ];
+  const handleSubmit = async () => {
+    console.log(`[FETCH] Begin repo list for ${org}`);
 
-    setRepos(testRepos);
+    let loadingRepos = [], page = 1;
+
+    while (page > -1) {
+      console.log(`[SUBFETCH] Fetching page ${page} for ${org}`);
+      let data = await fetch(`https://api.github.com/orgs/${org}/repos?page=${page}&per_page=${DEFAULT_PAGE_LENGTH}`),
+          json = await data.json();
+
+      loadingRepos = loadingRepos.concat(json);
+
+      if (json.length < DEFAULT_PAGE_LENGTH) {
+        page = -1;
+      } else {
+        page++;
+      }
+    }
+
+    setRepos(loadingRepos);
   }
 
   return (
@@ -28,11 +41,16 @@ function App() {
         <button onClick={handleSubmit}>Go!</button>
       </div>
       <div className="col list-repos">
-        <ul>
-          {repos.map((repo) => (
-            <li>{repo.name} ({repo.issues_count} issues)</li>
-          ))}
-        </ul>
+        {repos.length > 0 && (
+          <>
+            <small>Displaying {repos.length} respositories:</small>
+            <ul>
+              {repos.map((repo) => (
+                <li key={repo.id}>{repo.name} ({repo.open_issues_count} issues)</li>
+              ))}
+            </ul>
+          </>
+        )}
       </div>
     </div>
   )
