@@ -1,54 +1,57 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 
 function App() {
   const DEFAULT_PAGE_LENGTH = 100;
 
   const [org, setOrg] = useState();
+  const [selectedOrg, setSelectedOrg] = useState();
   const [selectedRepo, setSelectedRepo] = useState();
   const [repos, setRepos] = useState([]);
   const [commits, setCommits] = useState([]);
 
-  const handleUpdate = (e) => {
-    setOrg(e.target.value);
-  };
+  useEffect(() => {
+    const loadRepos = async () => {
+      console.log(`[FETCH] Begin repo list for ${selectedOrg}`);
 
-  const handleSubmit = async () => {
-    console.log(`[FETCH] Begin repo list for ${org}`);
+      let loadingRepos = [], page = 1;
+      while (page > -1) {
+        console.log(`[SUBFETCH] Fetching page ${page} for ${selectedOrg}`);
+        const response = await fetch(`https://api.github.com/orgs/${selectedOrg}/repos?page=${page}&per_page=${DEFAULT_PAGE_LENGTH}`);
+        const json = await response.json();
 
-    let loadingRepos = [], page = 1;
+        loadingRepos = loadingRepos.concat(json);
 
-    while (page > -1) {
-      console.log(`[SUBFETCH] Fetching page ${page} for ${org}`);
-      let json = await fetch(`https://api.github.com/orgs/${org}/repos?page=${page}&per_page=${DEFAULT_PAGE_LENGTH}`)
-                       .then((data) => data.json())
-                       .catch(console.log);
-
-      loadingRepos = loadingRepos.concat(json);
-
-      if (json.length < DEFAULT_PAGE_LENGTH) {
-        page = -1;
-      } else {
-        page++;
+        if (json.length < DEFAULT_PAGE_LENGTH) {
+          page = -1;
+        } else {
+          page++;
+        }
       }
-    }
 
-    loadingRepos.sort((a, b) => (a.open_issues_count < b.open_issues_count) ? 1 : -1);
+      loadingRepos.sort((a, b) => (a.open_issues_count < b.open_issues_count) ? 1 : -1);
+      setRepos(loadingRepos);
+    };
 
-    setRepos(loadingRepos);
-  }
+    if (selectedOrg) { loadRepos(); }
+  }, [selectedOrg, setRepos]);
 
-  const handleRepoSelect = async (repo) => {
-    console.log(`[FETCH] Begin commit list for ${repo}`);
+  useEffect(() => {
+    const loadCommits = async () => {
+      console.log(`[FETCH] Begin commit list for ${selectedRepo}`);
+      console.log(`[SUBFETCH] Fetching first page of commits for ${selectedRepo}`);
+      const response= await fetch(`https://api.github.com/repos/${selectedOrg}/${selectedRepo}/commits?&per_page=${DEFAULT_PAGE_LENGTH}`);
+      const json = await response.json();
 
-      console.log(`[SUBFETCH] Fetching first page of commits for ${repo}`);
-      let json = await fetch(`https://api.github.com/repos/${org}/${repo}/commits?&per_page=${DEFAULT_PAGE_LENGTH}`)
-                       .then((data) => data.json())
-                       .catch(console.log);
-
-      setSelectedRepo(repo);
       setCommits(json);
-  }
+    };
+
+    if (selectedRepo) { loadCommits(); }
+  }, [selectedRepo, selectedOrg, setCommits]);
+
+  const handleUpdate = (e) => setOrg(e.target.value);
+  const handleSubmit = () => setSelectedOrg(org);
+  const handleRepoSelect = (repo) => setSelectedRepo(repo);
 
   return (
     <div className="container">
