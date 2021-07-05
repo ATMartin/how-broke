@@ -20,8 +20,9 @@ function App() {
 
     while (page > -1) {
       console.log(`[SUBFETCH] Fetching page ${page} for ${org}`);
-      let data = await fetch(`https://api.github.com/orgs/${org}/repos?page=${page}&per_page=${DEFAULT_PAGE_LENGTH}`),
-          json = await data.json();
+      let json = await fetch(`https://api.github.com/orgs/${org}/repos?page=${page}&per_page=${DEFAULT_PAGE_LENGTH}`)
+                       .then((data) => data.json())
+                       .catch(console.log);
 
       loadingRepos = loadingRepos.concat(json);
 
@@ -41,42 +42,45 @@ function App() {
     console.log(`[FETCH] Begin commit list for ${repo}`);
 
       console.log(`[SUBFETCH] Fetching first page of commits for ${repo}`);
-      let data = await fetch(`https://api.github.com/repos/${org}/${repo}/commits?&per_page=${DEFAULT_PAGE_LENGTH}`),
-          json = await data.json();
+      let json = await fetch(`https://api.github.com/repos/${org}/${repo}/commits?&per_page=${DEFAULT_PAGE_LENGTH}`)
+                       .then((data) => data.json())
+                       .catch(console.log);
 
       setSelectedRepo(repo);
       setCommits(json);
   }
 
   return (
-    <div className="App">
+    <div className="container">
       <h1>How Broke IS it?</h1>
       <div className="col input-org">
-        <input onChange={handleUpdate} placeholder="Type your GitHub org name here..." />
-        <button onClick={handleSubmit}>Go!</button>
-      </div>
-      <div className="col list-repos">
+        <input onChange={handleUpdate} onBlur={handleSubmit} placeholder="Type your GitHub org name here..." />
+        <br />
         {repos.length > 0 && (
-          <>
-            <small>Displaying {repos.length} respositories:</small>
+          <small>Displaying {repos.length} respositories</small>
+        )}
+      </div>
+      {repos.length > 0 && (
+        <div className="col list-repos">
             <ul>
               {repos.map((repo) => (
-                <li key={repo.id}>
-                  {repo.name} ({repo.open_issues_count} issues)
-                  <button onClick={() => handleRepoSelect(repo.name)}>See Commits</button>
-                  {repo.name === selectedRepo && commits.length > 0 && (
-                    <ul className="list-commits">
-                      {commits.map((commit) => (
-                        <li>{commit.commit.message} ({commit.sha})</li>
-                      ))}
-                    </ul>
-                  )}
+                <li key={repo.id} onClick={() => handleRepoSelect(repo.name)}>
+                  {repo.name}: {repo.open_issues_count} 🛠
                 </li>
               ))}
             </ul>
-          </>
-        )}
-      </div>
+        </div>
+      )}
+      {commits.length > 0 && (
+        <div className="col list-commits">
+          <ul>
+            {commits.map((commit) => (
+              <li key={commit.sha}>
+               {commit.commit.message} (<a href={commit.url}>{commit.sha.substr(0, 6)}</a>)</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }
