@@ -18,6 +18,7 @@ Local setup is a breeze! 💨🍃
 
 ```
 git clone git@github.com/ATMartin/how-broke.git && cd $_
+npm install
 npm start
 ```
 
